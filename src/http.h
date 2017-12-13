@@ -34,6 +34,8 @@ void http_callback_404(httpd *, request *, int);
 /**@brief Callback for libhttpd */
 void http_callback_wifidog(httpd *, request *);
 /**@brief Callback for libhttpd */
+void http_callback_macaddr(httpd *, request *);
+/**@brief Callback for libhttpd */
 void http_callback_about(httpd *, request *);
 /**@brief Callback for libhttpd */
 void http_callback_status(httpd *, request *);

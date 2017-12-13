@@ -160,7 +160,7 @@ http_callback_404(httpd * webserver, request * r, int error_code)
         }
 
         debug(LOG_INFO, "Captured %s requesting [%s] and re-directing them to login page", r->clientAddr, url);
-        http_send_redirect_to_auth(r, urlFragment, "Redirect to login page");
+        http_send_redirect_to_portal(r, urlFragment, "Redirect to login page");
         free(urlFragment);
     }
     free(url);
@@ -170,6 +170,22 @@ void
 http_callback_wifidog(httpd * webserver, request * r)
 {
     send_http_page(r, "WiFiDog", "Please use the menu to navigate the features of this WiFiDog installation.");
+}
+
+void
+http_callback_macaddr(httpd * webserver, request * r)
+{
+    char* mac;
+    if (!(mac = arp_get(r->clientAddr))) {
+        /* We could not get their MAC address */
+        debug(LOG_INFO, "Failed to retrieve MAC address for ip %s.",
+              r->clientAddr);
+        httpdOutput(r, " ");
+    } else {
+        debug(LOG_INFO, "Got client MAC address for ip %s: %s", r->clientAddr, mac);
+        httpdOutput(r, mac);
+        free(mac);
+    }
 }
 
 void
@@ -222,6 +238,32 @@ http_send_redirect_to_auth(request * r, const char *urlFragment, const char *tex
     char *url = NULL;
     safe_asprintf(&url, "%s://%s:%d%s%s",
                   protocol, auth_server->authserv_hostname, port, auth_server->authserv_path, urlFragment);
+    http_send_redirect(r, url, text);
+    free(url);
+}
+
+/** @brief Convenience function to redirect the web browser to local portal
+ * @param r The request
+ * @param urlFragment The end of the auth server URL to redirect to (the part after path)
+ * @param text The text to include in the redirect header ant the mnual redirect title */
+void
+http_send_redirect_to_portal(request * r, const char *urlFragment, const char *text)
+{
+    char *protocol = NULL;
+    int port = 80;
+    t_auth_serv *auth_server = get_auth_server();
+
+    if (auth_server->authserv_use_ssl) {
+        protocol = "https";
+        port = auth_server->authserv_ssl_port;
+    } else {
+        protocol = "http";
+        port = auth_server->authserv_http_port;
+    }
+
+    char *url = NULL;
+    safe_asprintf(&url, "%s://%s:%d%s%s",
+                  "http", "192.168.1.1", 80, "/index.html", &urlFragment[6]);
     http_send_redirect(r, url, text);
     free(url);
 }

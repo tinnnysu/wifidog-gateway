@@ -401,11 +401,13 @@ main_loop(void)
 
     debug(LOG_DEBUG, "Assigning callbacks to web server");
     httpdAddCContent(webserver, "/", "wifidog", 0, NULL, http_callback_wifidog);
+    httpdAddCContent(webserver, "/", "macaddr", 0, NULL, http_callback_macaddr);
     httpdAddCContent(webserver, "/wifidog", "", 0, NULL, http_callback_wifidog);
     httpdAddCContent(webserver, "/wifidog", "about", 0, NULL, http_callback_about);
     httpdAddCContent(webserver, "/wifidog", "status", 0, NULL, http_callback_status);
     httpdAddCContent(webserver, "/wifidog", "auth", 0, NULL, http_callback_auth);
     httpdAddCContent(webserver, "/wifidog", "disconnect", 0, NULL, http_callback_disconnect);
+
 
     httpdSetErrorFunction(webserver, 404, http_callback_404);
 
